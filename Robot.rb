@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require './position'
-
 # Robot
 class Robot
   attr_reader :positon_x, :position_y, :position_f
