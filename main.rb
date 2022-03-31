@@ -1,53 +1,33 @@
-require './robot.rb'
-require './instruction.rb'
-require './position.rb'
+require './command.rb'
 
-current_instruction = Instruction.new
-robot = Robot.new
-answer_valid = false
-answer_main_valid = false
-report_position = []
 
-# First instruction must be PLACE X,Y,FACE
-# keep on asking then go to next
+robot_command = Command.new
+place_command = ''
+report_alert = ''
+#Get PLACE command loop.
 
-while (!answer_valid)
-    puts "Enter instruction (PLACE X,Y,FACE):"
-    ans = gets.chomp
-    current_instruction.instruction = ans
-    #check input if it is the right place format.
-    command = current_instruction.command
-    command_valid = current_instruction.command_valid
-    pos_x_valid = current_instruction.pos_x_valid
-    pos_y_valid = current_instruction.pos_y_valid
-    face_valid = current_instruction.face_valid
-    if (command_valid && pos_x_valid && pos_y_valid && face_valid && command == 'PLACE')
-        answer_valid = true
-        robot.place(current_instruction.pos_x,current_instruction.pos_y,current_instruction.face)
-    else
-        answer_valid = false
-        puts "Please enter valid PLACE command (PLACE X,Y,FACE)"
+while place_command != 'PLACE'
+    begin
+        puts "Place robot"
+        ans = gets
+        robot_command.command = ans
+        place_command = robot_command.robot_command
+    rescue
+        puts "Enter 'PLACE 0,0,FACE'"
+        retry
     end
 end
 
-while (!answer_main_valid)
-    puts "Enter instruction (MOVE | RIGHT | LEFT | REPORT):"
-    ans = gets.chomp
-    current_instruction.instruction = ans
-    
-    if (current_instruction.command == "PLACE")
-        puts "Please enter valid instruction"
-        answer_main_valid = false
-    elsif (current_instruction.command_valid)
-        dynamic_command = current_instruction.command.downcase
-        robot.public_send(dynamic_command)
-        if current_instruction.command == "REPORT"
-            answer_main_valid = true
-            report_position = robot.report
-        end
+#Command robot until report is received.
+while report_alert != 'REPORT'
+    begin
+        puts "New robot command (MOVE,RIGHT,LEFT,REPORT)"
+        ans = gets
+        robot_command.command = ans
+        report_alert = robot_command.robot_command
+    rescue
+        puts "Robot command: MOVE, RIGHT, LEFT, REPORT"
+        retry
     end
 end
-
-puts "Output: #{report_position[0]},#{report_position[1]},#{report_position[2]}"
-
 
