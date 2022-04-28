@@ -1,53 +1,38 @@
 # frozen_string_literal: true
 
-require './position'
-# place the robot or takes in command.
-class Robot
-  attr_reader :position
+require_relative './position'
+require_relative './command'
+require_relative './table'
 
-  def initialize
-    @position = Position.new
-    @turn_right = { 'NORTH' => 'EAST', 'SOUTH' => 'WEST', 'EAST' => 'SOUTH', 'WEST' => 'NORTH' }
-    @turn_left = { 'NORTH' => 'WEST', 'SOUTH' => 'EAST', 'EAST' => 'NORTH', 'WEST' => 'SOUTH' }
+
+# robot is not smart, it can only move forward and turn.
+
+class Robot
+  attr_reader :position_current, :position_next, :command, :table
+
+  def initialize(table)
+    @table = table
+    @command = Command.new
   end
 
-  def place(value)
-    @position = value
+  def place(position_current)
+    @position_current = position_current
+    raise "X Position is out of bound" unless position_current.pos_x.between?(0,table.width)
+    raise "Y Position is out of bound" unless position_current.pos_y.between?(0,table.length)
   end
 
   def move
-  case @position.pos_f
-  when 'NORTH'
-    @position.position_y = @position.pos_y + 1 if @position.pos_y < 5
-  when 'SOUTH'
-    @position.position_y =  @position.pos_y - 1 if @position.pos_y > 0
-  when 'EAST'
-    @position.position_x = @position.pos_x+ 1 if @position.pos_x < 5
-  when 'WEST'
-    @position.position_x =  @position.pos_x-1 if @position.pos_x > 0
-  end
-
+   @position_next = command.move(@position_current)
+   raise "X Position is out of bound" unless position_next.pos_x.between?(0,table.width)
+   raise "Y Position is out of bound" unless position_next.pos_y.between?(0,table.length)
+   @position_current = @position_next
   end
 
   def right
-    @turn_right.each do |key, value|
-      if @position.pos_f == key
-        @position.position_f = value
-        break
-      end
-    end
+    @position_current = command.turn(@position_current,'RIGHT')
   end
 
   def left
-    @turn_left.each do |key, value|
-      if @position.pos_f == key
-        @position.position_f = value
-        break
-      end
-    end
-  end
-
-  def report
-    @report = "Output: #{position.pos_x},#{position.pos_y},#{position.pos_f}"
+    @positon_current = command.turn(@position_current, 'LEFT')
   end
 end

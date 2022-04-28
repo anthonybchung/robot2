@@ -1,33 +1,47 @@
-require './command.rb'
+require_relative 'table'
+require_relative 'robot'
+require_relative 'place'
+require_relative 'instruction'
 
+table = Table.new(5, 5)
+robot = Robot.new(table)
+instruction = Instruction.new
 
-robot_command = Command.new
-place_command = ''
-report_alert = ''
-#Get PLACE command loop.
-
-while place_command != 'PLACE'
-    begin
-        puts "Place robot"
-        ans = gets
-        robot_command.command = ans
-        place_command = robot_command.robot_command
-    rescue
-        puts "Enter 'PLACE 0,0,FACE'"
-        retry
-    end
+begin
+  puts 'Enter PLACE'
+  ans = gets.chomp
+  place = Place.new
+  place.parse(ans)
+  robot.place(place.position)
+rescue StandardError
+  puts 'First input must be PLACE X,Y,FACE.'
+  puts 'X,Y must be witin 0 and 5'
+  puts 'FACE must be NORTH,SOUTH,EAST or WEST'
+  retry
 end
 
-#Command robot until report is received.
-while report_alert != 'REPORT'
-    begin
-        puts "New robot command (MOVE,RIGHT,LEFT,REPORT)"
-        ans = gets
-        robot_command.command = ans
-        report_alert = robot_command.robot_command
-    rescue
-        puts "Robot command: MOVE, RIGHT, LEFT, REPORT"
-        retry
+main_loop = true
+while main_loop
+  begin
+    puts 'Enter next command'
+    ans = gets.chomp
+    instruction.parse(ans)
+    case instruction.instruction
+    when 'PLACE'
+        robot.place(instruction.position)
+    when 'MOVE'
+        robot.move
+    when 'LEFT'
+        robot.left
+    when 'RIGHT'
+        robot.right
     end
+  rescue StandardError
+    puts 'Enter valid instruction'
+    retry
+  end
+  main_loop = false if instruction.instruction == 'REPORT'
 end
 
+position_current = robot.position_current
+  puts "Output: #{position_current.pos_x},#{position_current.pos_y},#{position_current.pos_f}"
